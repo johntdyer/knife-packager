@@ -1,3 +1,5 @@
+$: << File.expand_path(File.dirname(__FILE__))
+
 require 'chef/knife'
 require 'fileutils'
 require 'digest/md5'
