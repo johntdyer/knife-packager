@@ -29,14 +29,24 @@ module Packager
 
 
     def get_dependencies()
-      puts ui.highline.color  "Gathering cookbook dependencies", :green
+      puts ui.highline.color  "Gathering cookbook dependencies (this will take a minute)", :green
       FileUtils.rm_rf("/tmp/cookbooks")
-      `berks install --path /tmp/cookbooks`
+      STDOUT.sync = true
+      berks =  `berks install --path /tmp/cookbooks`
+      unless $?.exitstatus == 0
+        puts ui.highline.color  "Failed to gather dependencies", :red
+        exit 3
+      end
+      puts berks
     end
 
     def package_files
       puts ui.highline.color  "== Packaging cookbook", :green
       `cd /tmp; tar zcf #{get_cookbook_name}.#{get_cookbook_version}.tgz ./cookbooks`
+      unless $?.exitstatus == 0
+        puts ui.highline.color  "Failed to archive cookbooks", :red
+        exit 3
+      end
       return "/tmp/#{get_cookbook_name}.#{get_cookbook_version}.tgz"
     end
 
@@ -86,7 +96,7 @@ module Packager
           obj = nil
         end
 
-        puts ui.highline.color  "== Uploading #{@config.bucket_name}/#{get_folder_name}/#{file.split("/")[-1]}", :green
+        puts ui.highline.color  "== Uploading http://#{@config.bucket_name}/#{get_folder_name}/#{file.split("/")[-1]}", :blue
         obj = bucket.objects.build(remote_file)
         obj.content = open(file)
         obj.content_type = MIME::Types.type_for(file).to_s
