@@ -1,6 +1,10 @@
 $: << File.expand_path(File.dirname(__FILE__))
 
+# workaround for https://github.com/RiotGames/berkshelf/issues/270
+lang = ENV['LANG']
 require 'berkshelf/cli'
+ENV['LANG'] = lang unless lang.nil?
+
 require 'chef/knife'
 require 'digest/md5'
 require 'fileutils'
