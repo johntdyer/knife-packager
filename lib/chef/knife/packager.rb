@@ -1,14 +1,14 @@
 $: << File.expand_path(File.dirname(__FILE__))
 
-require 'chef/knife'
-require 'fileutils'
-require 'digest/md5'
-require 'mime/types'
 require 'berkshelf/cli'
-require 's3'
+require 'chef/knife'
+require 'digest/md5'
+require 'fileutils'
+require 'mime/types'
 require 'pathname'
+require 's3'
+require 'voxconfig'
 require 'yaml'
-require "voxconfig"
 
 module Packager
 
