@@ -1,14 +1,19 @@
 $: << File.expand_path(File.dirname(__FILE__))
 
-require 'chef/knife'
-require 'fileutils'
-require 'digest/md5'
-require 'mime/types'
+# workaround for https://github.com/RiotGames/berkshelf/issues/270
+lang = ENV['LANG']
 require 'berkshelf/cli'
-require 's3'
+ENV['LANG'] = lang unless lang.nil?
+
+require 'chef/knife'
+require 'digest/md5'
+require 'fileutils'
+require 'mime/types'
 require 'pathname'
+require 's3'
+require 'tmpdir'
+require 'voxconfig'
 require 'yaml'
-require "voxconfig"
 
 module Packager
 
@@ -22,17 +27,18 @@ module Packager
     def run
       Berkshelf::Config.new
       @config = VoxConfig.new(Dir.pwd)
+      @tmp = Dir.mktmpdir
       get_dependencies
       pkg = package_files
       upload_cookbooks(pkg)
+      FileUtils.remove_entry_secure(@tmp)
     end
 
 
     def get_dependencies()
       puts ui.highline.color  "Gathering cookbook dependencies (this will take a minute)", :green
-      FileUtils.rm_rf("/tmp/cookbooks")
       STDOUT.sync = true
-      berks =  `berks install --path /tmp/cookbooks`
+      berks =  `berks install --path #{@tmp}/cookbooks`
       unless $?.exitstatus == 0
         puts ui.highline.color  "Failed to gather dependencies", :red
         exit 3
@@ -42,12 +48,12 @@ module Packager
 
     def package_files
       puts ui.highline.color  "== Packaging cookbook", :green
-      `cd /tmp; tar zcf #{get_cookbook_name}.#{get_cookbook_version}.tgz ./cookbooks`
+      `cd #{@tmp}; tar zcf #{get_cookbook_name}.#{get_cookbook_version}.tgz ./cookbooks`
       unless $?.exitstatus == 0
         puts ui.highline.color  "Failed to archive cookbooks", :red
         exit 3
       end
-      return "/tmp/#{get_cookbook_name}.#{get_cookbook_version}.tgz"
+      return "#{@tmp}/#{get_cookbook_name}.#{get_cookbook_version}.tgz"
     end
 
     def get_cookbook_version
