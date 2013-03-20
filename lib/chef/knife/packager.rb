@@ -31,6 +31,10 @@ module Packager
 
 
     def run
+        $stdout.sync = true
+
+        puts "release ==> #{config[:release]}"
+        exit
       Berkshelf::Config.new
       @config = VoxConfig.new(Dir.pwd)
       @tmp = Dir.mktmpdir
@@ -63,8 +67,8 @@ module Packager
     end
 
     def get_cookbook_version
-        if config[:ssh_user]
-            return config[:ssh_user]
+        if config[:release]
+            return config[:release]
         else
             IO.read(Berkshelf.find_metadata).match(/^version.*/).to_s.split('"')[1]
         end
