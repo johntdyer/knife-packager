@@ -32,7 +32,7 @@ module Packager
 
     def run
         $stdout.sync = true
-
+        @cookbook_version = get_cookbook_version(config[:"version-override"])
         Berkshelf::Config.new
         @config = VoxConfig.new(Dir.pwd)
         @tmp = Dir.mktmpdir
@@ -56,17 +56,17 @@ module Packager
 
     def package_files
       puts ui.highline.color  "== Packaging cookbook", :green
-      `cd #{@tmp}; tar zcf #{get_cookbook_name}.#{get_cookbook_version}.tgz ./cookbooks`
+      `cd #{@tmp}; tar zcf #{get_cookbook_name}.#{@cookbook_version}.tgz ./cookbooks`
       unless $?.exitstatus == 0
         puts ui.highline.color  "Failed to archive cookbooks", :red
         exit 3
       end
-      return "#{@tmp}/#{get_cookbook_name}.#{get_cookbook_version}.tgz"
+      return "#{@tmp}/#{get_cookbook_name}.#{@cookbook_version}.tgz"
     end
 
-    def get_cookbook_version
-        if config[:"version-override"]
-            return config[:"version-override"]
+    def get_cookbook_version(params)
+        if params
+            return params
         else
             IO.read(Berkshelf.find_metadata).match(/^version.*/).to_s.split('"')[1]
         end
