@@ -24,8 +24,8 @@ module Packager
 
     banner "knife packager"
 
-     option :release,
-            :long => "--release VERSION",
+     option :"version-override",
+            :long => "--version-override VERSION",
             :description => "Override version number of uploaded cookook",
             :default => nil
 
@@ -33,15 +33,13 @@ module Packager
     def run
         $stdout.sync = true
 
-        puts "release ==> #{config[:release]}"
-        exit
-      Berkshelf::Config.new
-      @config = VoxConfig.new(Dir.pwd)
-      @tmp = Dir.mktmpdir
-      get_dependencies
-      pkg = package_files
-      upload_cookbooks(pkg)
-      FileUtils.remove_entry_secure(@tmp)
+        Berkshelf::Config.new
+        @config = VoxConfig.new(Dir.pwd)
+        @tmp = Dir.mktmpdir
+        get_dependencies
+        pkg = package_files
+        upload_cookbooks(pkg)
+        FileUtils.remove_entry_secure(@tmp)
     end
 
 
@@ -67,8 +65,8 @@ module Packager
     end
 
     def get_cookbook_version
-        if config[:release]
-            return config[:release]
+        if config[:"version-override"]
+            return config[:"version-override"]
         else
             IO.read(Berkshelf.find_metadata).match(/^version.*/).to_s.split('"')[1]
         end
