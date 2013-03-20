@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |gem|
   gem.name          = "knife-packager"
-  gem.version       = "0.1.2"
+  gem.version       = "0.1.3"
   gem.authors       = ["John Dyer"]
   gem.email         = ["johntdyer@gmail.com"]
   gem.description   = %q{Knife pluging to deploy cookbooks to S3}

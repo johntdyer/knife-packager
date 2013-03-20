@@ -24,6 +24,12 @@ module Packager
 
     banner "knife packager"
 
+     option :release,
+            :long => "--release VERSION",
+            :description => "Override version number of uploaded cookook",
+            :default => nil
+
+
     def run
       Berkshelf::Config.new
       @config = VoxConfig.new(Dir.pwd)
@@ -57,7 +63,11 @@ module Packager
     end
 
     def get_cookbook_version
-      IO.read(Berkshelf.find_metadata).match(/^version.*/).to_s.split('"')[1]
+        if config[:ssh_user]
+            return config[:ssh_user]
+        else
+            IO.read(Berkshelf.find_metadata).match(/^version.*/).to_s.split('"')[1]
+        end
     end
 
     def get_folder_name
